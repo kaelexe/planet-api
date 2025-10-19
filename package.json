@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "setup:docker": "node setup-docker.js",
+    "setup:docker": "node scripts/setup-docker.js",
     "docker:up": "docker-compose up -d --build",
     "docker:down": "docker-compose down",
     "make:migration": "node scripts/make-migration.js"
