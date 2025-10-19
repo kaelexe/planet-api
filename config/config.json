@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "password",
+    "database": "planet_db",
+    "host": "planet-db",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "password",
+    "database": "planet_test_db",
+    "host": "planet-db",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "password",
+    "database": "planet_prod_db",
+    "host": "planet-db",
+    "dialect": "mysql"
+  }
+}

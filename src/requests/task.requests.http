@@ -1,17 +1,23 @@
 
-GET http://planet.api.local:3000/api/tasks
+
+
+# Fetch all tasks
+GET http://localhost/api/tasks
 Accept: application/json
 Content-Type: application/json
 
 ###
 
-GET http://planet.api.local:3000/api/tasks/1
+# Fetch task by ID
+# api/tasks/{task_ID}
+GET http://localhost/api/tasks/1
 Accept: application/json
 Content-Type: application/json
 
 ###
 
-POST http://planet.api.local:3000/api/tasks
+# Create a new task
+POST http://localhost/api/tasks
 Accept: application/json
 Content-Type: application/json
 

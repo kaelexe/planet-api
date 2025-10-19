@@ -10,6 +10,9 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# Dev Requests
+src/requests/*.dev.http
+
 # Logs
 logs
 *.log
@@ -40,6 +43,11 @@ docker-compose.override.yml
 *.tar
 *.pid
 *.sock
+
+# Docker generated files
+Dockerfile
+docker-compose.yml
+docker-entrypoint.sh
 
 # Temporary files
 tmp/
