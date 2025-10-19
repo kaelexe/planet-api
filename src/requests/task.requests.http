@@ -1,0 +1,22 @@
+
+GET http://planet.api.local:3000/api/tasks
+Accept: application/json
+Content-Type: application/json
+
+###
+
+GET http://planet.api.local:3000/api/tasks/1
+Accept: application/json
+Content-Type: application/json
+
+###
+
+POST http://planet.api.local:3000/api/tasks
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "New Task",
+  "description": "This is a new task.",
+  "completed": false
+}

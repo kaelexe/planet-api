@@ -1,0 +1,69 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+log.*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build output
+dist/
+build/
+.cache/
+.next/
+out/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+.docker/
+*.tar
+*.pid
+*.sock
+
+# Temporary files
+tmp/
+temp/
+coverage/
+*.tgz
+*.bak
+*.tmp
+*.orig
+
+# Test files
+jest-html-reporters-*
+test-results/
+coverage-final.json
+
+# Ignore local database volume
+mysql_data/
+
+# Ignore local backups or exports
+*.sql
+*.dump
+
+# Ignore package locks if using a specific manager
+# (Uncomment one of the following if desired)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

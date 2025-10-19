@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  api:
+    build: .
+    container_name: planet-api
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  db:
+    image: mysql:8.0
+    container_name: planet-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: planetpass
+      MYSQL_DATABASE: planetdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - planet-db-data:/var/lib/mysql
+
+volumes:
+  planet-db-data:
