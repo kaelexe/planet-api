@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Tasks", {
+    await queryInterface.createTable("tasks", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -15,6 +15,11 @@ module.exports = {
       },
       description: {
         type: Sequelize.TEXT,
+      },
+      priority: {
+        type: Sequelize.ENUM("normal", "minor", "high", "important"),
+        defaultValue: "normal",
+        allowNull: false,
       },
       isComplete: {
         type: Sequelize.BOOLEAN,

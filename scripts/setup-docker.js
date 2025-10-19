@@ -15,10 +15,18 @@ const files = {
 };
 
 // --- docker-entrypoint.sh ---
-const entrypoint = `
-#!/bin/sh
+const entrypoint = `#!/bin/sh
 set -e
 
+echo "🔧 Starting Planet API setup..."
+
+# Load environment variables
+if [ -f .env ]; then
+  echo "✅ Loading environment variables from .env"
+  export $(grep -v '^#' .env | xargs)
+fi
+
+# Wait for MySQL to be ready
 echo "⏳ Waiting for ${DB_HOST} to be ready..."
 until nc -z ${DB_HOST} 3306; do
   echo "⏳ Waiting for MySQL..."
@@ -26,34 +34,70 @@ until nc -z ${DB_HOST} 3306; do
 done
 
 echo "✅ Database is ready. Running migrations..."
-npx sequelize-cli db:migrate --config config/config.cjs
+# Retry migrations until successful
+until npx sequelize-cli db:migrate --config config/config.cjs; do
+  echo "⏳ Migrations failed, retrying..."
+  sleep 2
+done
 
-echo "🚀 Starting application..."
-exec npm start
+# Build TS project if dist does not exist
+if [ ! -d "dist" ]; then
+  echo "🛠 Building TypeScript project..."
+  npm run build
+else
+  echo "✅ Build directory exists — skipping build."
+fi
+
+echo "🚀 Starting Planet API..."
+exec node dist/src/server.js
 `;
 
 // --- Dockerfile ---
-const dockerfile = `
+const dockerfile = `# ----------------------------
+# 🏗️ Build Stage
+# ----------------------------
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+# Copy dependency files first
+COPY package*.json tsconfig.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy all project files
+COPY . .
+
+# Build TypeScript
+RUN npm run build
+
+# ----------------------------
+# 🚀 Runtime Stage
+# ----------------------------
 FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Copy necessary files from build stage
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/migrations ./migrations
+COPY --from=build /app/config ./config
+COPY --from=build /app/scripts ./scripts
+COPY --from=build /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-COPY . .
-
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Make entrypoint executable
+RUN chmod +x ./docker-entrypoint.sh
 
 EXPOSE ${PORT}
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
 `;
 
 // --- docker-compose.yml ---
-const compose = `
-version: "3.8"
+const compose = `version: "3.8"
 
 services:
   api:
@@ -65,13 +109,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - ${DB_HOST}
+      - db
     volumes:
       - .:/app
     networks:
       - planet-net
 
-  ${DB_HOST}:
+  db:
     image: mysql:8
     container_name: ${DB_HOST}
     restart: always
@@ -84,6 +128,11 @@ services:
       - "3306:3306"
     networks:
       - planet-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   planet-mysql-data:

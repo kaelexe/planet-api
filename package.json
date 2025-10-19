@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "setup:docker": "node scripts/setup-docker.js",
     "docker:up": "docker-compose up -d --build",
     "docker:down": "docker-compose down",
@@ -24,7 +25,12 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.8.1",
     "nodemon": "^3.1.10",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
