@@ -87,12 +87,79 @@ export const markComplete = async (
     if (!req.params.id) {
       return res.status(400).json({ message: "Task ID is required" });
     }
-    logger.info(`Marking task ${req.params.id} as complete`);
 
-    const updatedTask = await taskService.markTaskAsComplete(req.params.id);
+    const updatedTask = await taskService.markComplete(req.params.id);
 
     if (updatedTask) {
       res.json(updatedTask);
+      logger.info(`Marking task ${req.params.id} as complete`);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const archiveTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.archiveTask(req.params.id);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+      logger.info(`Archiving task ${req.params.id}`);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const markAsDone = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.markAsDone(req.params.id);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+      logger.info(`Marking task ${req.params.id} as done`);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const deleted = await taskService.deleteTask(req.params.id);
+    if (deleted) {
+      res.status(204).send();
     } else {
       res.status(404).json({ message: "Task not found" });
     }

@@ -12,6 +12,7 @@ class TaskModel extends Model<Task, TaskInput> implements Task {
   public title!: string;
   public description!: string | null;
   public isComplete!: boolean;
+  public archived!: boolean;
   public priority!: TaskPriority;
 
   public readonly createdAt!: Date;
@@ -34,6 +35,11 @@ TaskModel.init(
       allowNull: true,
     },
     isComplete: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    archived: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,

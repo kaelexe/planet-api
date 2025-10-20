@@ -31,15 +31,46 @@ export const updateTask = async (
 };
 
 // Mark a task as complete
-export const markTaskAsComplete = async (
+export const markComplete = async (
   id: number | string
 ): Promise<Task | null> => {
   const task = await TaskModel.findByPk(id);
-  
+
   if (task) {
     task.isComplete = true;
     await task.save();
     return task;
   }
   return null;
+};
+
+export const archiveTask = async (
+  id: number | string
+): Promise<Task | null> => {
+  const task = await TaskModel.findByPk(id);
+
+  if (task) {
+    task.archived = true;
+    await task.save();
+    return task;
+  }
+  return null;
+};
+
+export const markAsDone = async (id: number | string): Promise<Task | null> => {
+  const task = await TaskModel.findByPk(id);
+
+  if (task) {
+    task.isComplete = true;
+    task.archived = true;
+    await task.save();
+    return task;
+  }
+  return null;
+};
+
+// Delete a task
+export const deleteTask = async (id: number | string): Promise<boolean> => {
+  const deletedCount = await TaskModel.destroy({ where: { id } });
+  return deletedCount > 0;
 };
