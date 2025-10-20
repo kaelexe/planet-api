@@ -1,13 +1,14 @@
+# 
+# Task Management API Requests
+#
 
-
-
+###
 # Fetch all tasks
 GET http://localhost/api/tasks
 Accept: application/json
 Content-Type: application/json
 
 ###
-
 # Fetch task by ID
 # api/tasks/{task_ID}
 GET http://localhost/api/tasks/1
@@ -15,7 +16,16 @@ Accept: application/json
 Content-Type: application/json
 
 ###
+# Fetch tasks by search,priority,completed, archived status and sort by priority and created at
+GET http://localhost/api/tasks?search=task
+# GET http://localhost/api/tasks?priority=normal
+# GET http://localhost/api/tasks?completed=true
+# GET http://localhost/api/tasks?archived=false
+# GET http://localhost/api/tasks?sortBy=createdAt&order=desc
+Accept: application/json
+Content-Type: application/json
 
+###
 # Create a new task
 POST http://localhost/api/tasks
 Accept: application/json
@@ -24,5 +34,55 @@ Content-Type: application/json
 {
   "title": "New Task",
   "description": "This is a new task.",
-  "completed": false
+  "priority": "normal",
+  "isComplete": false
 }
+
+###
+# Update an existing task
+PUT http://localhost/api/tasks/1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "Updated Task",
+  "description": "This task has been updated.",
+  "priority": "important",
+  "isComplete": true
+}
+
+###
+# Mark task as completed
+PATCH http://localhost/api/tasks/1/complete
+Accept: application/json
+Content-Type: application/json
+
+###
+# Mark task as not completed
+PATCH http://localhost/api/tasks/1/not-complete
+Accept: application/json
+Content-Type: application/json
+
+###
+# Mark task as archived
+PATCH http://localhost/api/tasks/1/archive
+Accept: application/json
+Content-Type: application/json
+
+###
+# Mark task as unarchived
+PATCH http://localhost/api/tasks/1/unarchive
+Accept: application/json
+Content-Type: application/json
+
+###
+# Mark task as completed and archived
+PATCH http://localhost/api/tasks/1/done
+Accept: application/json
+Content-Type: application/json
+
+###
+# Delete a task
+DELETE http://localhost/api/tasks/1
+Accept: application/json
+Content-Type: application/json
