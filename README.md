@@ -173,6 +173,7 @@ src/migrations/001-add-priority-to-tasks.cjs
 | `npm run setup:docker` | Initializes docker containers, builds and run |
 | `npm run docker:up` | Builds and run containers |
 | `npm run docker:down` | Stops and remove containers |
+| `npm run docker:reset`| Resets docker containers |
 | `npm run make:migration {migration-name}` | Creates migration files |
 
 ---

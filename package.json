@@ -11,6 +11,7 @@
     "setup:docker": "node scripts/setup-docker.js",
     "docker:up": "docker-compose up -d --build",
     "docker:down": "docker-compose down",
+    "docker:reset": "ts-node scripts/docker-reset.js",
     "make:migration": "node scripts/make-migration.js"
   },
   "keywords": [],

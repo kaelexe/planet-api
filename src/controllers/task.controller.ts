@@ -55,3 +55,48 @@ export const addTask = async (
     next(err);
   }
 };
+
+export const updateTask = async (
+  req: Request<{ id: string }, {}, Partial<TaskInput>>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.updateTask(req.params.id, req.body);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const markComplete = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+    logger.info(`Marking task ${req.params.id} as complete`);
+
+    const updatedTask = await taskService.markTaskAsComplete(req.params.id);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};

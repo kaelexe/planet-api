@@ -10,6 +10,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/api", routes);
 
+// TODO:implement authentication middleware
+
 export const startDatabase = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
