@@ -384,7 +384,6 @@ export class Logger {
     return childLogger;
   }
 }
-// TODO: does not work
 // Create default logger instance
 export const logger = new Logger({
   logDir: process.env.LOG_DIR || path.join(process.cwd(), "logs"),

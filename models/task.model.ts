@@ -6,6 +6,8 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db.config.js";
 import { TaskPriority } from "../src/constants/enums/tasks.priority.enum.js";
 
+// TODO: Add userID field when auth is implemented
+
 // --- Model Definition ---
 class TaskModel extends Model<Task, TaskInput> implements Task {
   public id!: number;

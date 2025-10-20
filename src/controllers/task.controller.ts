@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as taskService from "../services/task.service.js";
 import { logger } from "../utils/logger.js";
 import { TaskInput } from "../constants/types/tasks.interface.js";
+import { SortOrder, sortByKey } from "../utils/sort.js";
 
 export const getTasks = async (
   req: Request,
@@ -9,12 +10,58 @@ export const getTasks = async (
   next: NextFunction
 ) => {
   try {
-    const tasks = await taskService.getAllTasks();
-    res.json(tasks);
+    // filters
+    const searchParam = req.query.search as string | undefined;
+    const priorityParam = req.query.priority as string | undefined;
+    const isCompleteParam = req.query.isComplete as string | undefined;
+    const archivedParam = req.query.archived as string | undefined;
+    const search = searchParam?.trim().toLowerCase();
+    // sort
+    const sortBy = req.query.sortBy as string | undefined;
+    const sortOrder = req.query.sortOrder as SortOrder;
+
+    const tasks = (await taskService.getAllTasks()).filter((task) => {
+      // SEARCH: include if title OR description contains the search string
+      if (search) {
+        const inTitle = task.title?.toLowerCase().includes(search);
+        const inDescription = task.description?.toLowerCase().includes(search);
+        if (!(inTitle || inDescription)) return false;
+      }
+
+      // PRIORITY: normalize both sides to string for reliable comparison
+      if (priorityParam) {
+        if (String(task.priority) !== String(priorityParam)) return false;
+      }
+
+      // isComplete: only filter if param provided
+      if (typeof isCompleteParam !== "undefined") {
+        const wantComplete = isCompleteParam === "true";
+        if (task.isComplete !== wantComplete) return false;
+      }
+
+      // archived: only filter if param provided
+      if (typeof archivedParam !== "undefined") {
+        const wantArchived = archivedParam === "true";
+        if (task.archived !== wantArchived) return false;
+      }
+
+      return true;
+    });
+
+    // FIXME: sort order not working
+    // SORTING
+    const sorted = sortByKey(
+      tasks,
+      sortBy as keyof (typeof tasks)[0],
+      sortOrder
+    );
+
+    res.json(sorted);
   } catch (err) {
     next(err);
   }
 };
+
 
 export const getTask = async (
   req: Request,
