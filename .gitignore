@@ -46,8 +46,10 @@ docker-compose.override.yml
 
 # Docker generated files
 Dockerfile
+Dockerfile.dev
 docker-compose.yml
 docker-entrypoint.sh
+.docker-env-cache
 
 # Temporary files
 tmp/

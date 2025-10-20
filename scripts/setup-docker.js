@@ -1,86 +1,117 @@
 import fs from "fs";
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const { NODE_ENV, PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_DIALECT } =
-  process.env;
+const { NODE_ENV, PORT, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
+
+const isDev = NODE_ENV === "development";
 
 // --- File paths ---
 const files = {
-  dockerfile: "./Dockerfile",
+  dockerfile: isDev ? "./Dockerfile.dev" : "./Dockerfile",
   compose: "./docker-compose.yml",
   entrypoint: "./docker-entrypoint.sh",
+  cacheFile: "./.docker-env-cache",
 };
 
 // --- docker-entrypoint.sh ---
 const entrypoint = `#!/bin/sh
 set -e
 
-echo "🔧 Starting Planet API setup..."
+echo "[$(date)] 🔧 Starting Planet API setup..."
 
 # Load environment variables
 if [ -f .env ]; then
-  echo "✅ Loading environment variables from .env"
+  echo "[$(date)] ✅ Loading environment variables from .env"
   export $(grep -v '^#' .env | xargs)
 fi
 
+# ✅ Safe cleanup for dangling images
+echo "[$(date)] 🧹 Cleaning up dangling images for 'planet-api'..."
+docker image prune -f --filter label=com.docker.compose.project=planet-api || true
+
 # Wait for MySQL to be ready
-echo "⏳ Waiting for ${DB_HOST} to be ready..."
+echo "[$(date)] ⏳ Waiting for ${DB_HOST} to be ready..."
 until nc -z ${DB_HOST} 3306; do
-  echo "⏳ Waiting for MySQL..."
+  echo "[$(date)] ⏳ Waiting for MySQL..."
   sleep 2
 done
 
-echo "✅ Database is ready. Running migrations..."
-# Retry migrations until successful
+echo "[$(date)] ✅ Database is ready. Running migrations..."
 until npx sequelize-cli db:migrate --config config/config.cjs; do
-  echo "⏳ Migrations failed, retrying..."
+  echo "[$(date)] ⏳ Migrations failed, retrying..."
   sleep 2
 done
 
-# Build TS project if dist does not exist
-if [ ! -d "dist" ]; then
-  echo "🛠 Building TypeScript project..."
-  npm run build
+# --- Development Mode ---
+if [ "$NODE_ENV" = "development" ]; then
+  echo "[$(date)] 👀 Development mode detected..."
+
+  # Check if dist exists or rebuild needed
+  if [ ! -d "dist" ]; then
+    echo "[$(date)] 🛠 Build directory not found — running initial TypeScript build..."
+    npm run build
+  else
+    if find src -type f -newer dist 2>/dev/null | grep -q .; then
+      echo "[$(date)] 🛠 Detected changes in source files — rebuilding TypeScript..."
+      npm run build
+    else
+      echo "[$(date)] ✅ No source changes detected — skipping rebuild."
+    fi
+  fi
+  
 else
-  echo "✅ Build directory exists — skipping build."
+  # --- Production Mode ---
+  if [ ! -d "dist" ]; then
+    echo "[$(date)] 🛠 Building TypeScript project..."
+    npm run build
+  fi
 fi
 
-echo "🚀 Starting Planet API..."
+echo "[$(date)] 🚀 Starting Planet API ${NODE_ENV}..."
 exec node dist/src/server.js
 `;
 
-// --- Dockerfile ---
-const dockerfile = `# ----------------------------
+// --- Dockerfile.dev ---
+const dockerfileDev = `# ----------------------------
+# 🧩 Development Dockerfile
+# ----------------------------
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json tsconfig.json ./
+RUN npm install
+
+COPY . .
+
+RUN chmod +x ./docker-entrypoint.sh
+
+EXPOSE ${PORT}
+ENTRYPOINT ["./docker-entrypoint.sh"]
+`;
+
+// --- Dockerfile (production) ---
+const dockerfileProd = `# ----------------------------
 # 🏗️ Build Stage
 # ----------------------------
 FROM node:18-alpine AS build
 
 WORKDIR /app
-
-# Copy dependency files first
 COPY package*.json tsconfig.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy all project files
 COPY . .
-
-# Build TypeScript
 RUN npm run build
 
 # ----------------------------
 # 🚀 Runtime Stage
 # ----------------------------
 FROM node:18-alpine
-
 WORKDIR /app
 
-# Copy necessary files from build stage
-COPY --from=build /app/package*.json ./
+COPY --from=build /app/package*.json ./ 
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/migrations ./migrations
@@ -88,20 +119,21 @@ COPY --from=build /app/config ./config
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-# Make entrypoint executable
 RUN chmod +x ./docker-entrypoint.sh
 
 EXPOSE ${PORT}
-
 ENTRYPOINT ["./docker-entrypoint.sh"]
 `;
 
 // --- docker-compose.yml ---
 const compose = `version: "3.8"
+name: planet-api
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: ${isDev ? "Dockerfile.dev" : "Dockerfile"}
     container_name: planet-api
     restart: always
     ports:
@@ -112,6 +144,7 @@ services:
       - db
     volumes:
       - .:/app
+      - /app/node_modules
     networks:
       - planet-net
 
@@ -141,37 +174,55 @@ networks:
   planet-net:
 `;
 
-// --- Safeguard system ---
-function fileExists(path) {
-  return fs.existsSync(path);
-}
-
-function createFile(path, content) {
+// --- Helpers ---
+const fileExists = (path) => fs.existsSync(path);
+const createFile = (path, content) => {
   fs.writeFileSync(path, content.trim() + "\n");
   console.log(`📝 Created ${path}`);
-}
+};
 
-console.log("🔍 Checking Docker setup files...");
+// --- Detect environment change ---
+let cachedEnv = "";
+if (fileExists(files.cacheFile))
+  cachedEnv = fs.readFileSync(files.cacheFile, "utf-8").trim();
 
-const existingFiles = Object.entries(files)
-  .filter(([_, path]) => fileExists(path))
-  .map(([name]) => name);
-
-if (existingFiles.length === Object.keys(files).length) {
-  console.log("✅ All Docker setup files already exist. Skipping creation...");
+if (cachedEnv !== NODE_ENV) {
+  console.log(
+    `⚙️ Environment changed (${
+      cachedEnv || "none"
+    } → ${NODE_ENV}). Regenerating files...`
+  );
+  Object.values(files).forEach((path) => {
+    if (path !== files.cacheFile && fileExists(path)) fs.unlinkSync(path);
+  });
 } else {
-  console.log("⚙️ Generating missing Docker setup files...");
-  if (!fileExists(files.dockerfile)) createFile(files.dockerfile, dockerfile);
-  if (!fileExists(files.compose)) createFile(files.compose, compose);
-  if (!fileExists(files.entrypoint)) createFile(files.entrypoint, entrypoint);
-  console.log("✅ Docker setup files created successfully.");
+  console.log(`🔍 Using existing files for environment: ${NODE_ENV}`);
 }
 
-// --- Build & Run containers ---
+// --- Write environment cache ---
+fs.writeFileSync(files.cacheFile, NODE_ENV);
+
+// --- Generate files if missing ---
+if (!fileExists(files.entrypoint)) createFile(files.entrypoint, entrypoint);
+if (!fileExists(files.compose)) createFile(files.compose, compose);
+if (!fileExists(files.dockerfile))
+  createFile(files.dockerfile, isDev ? dockerfileDev : dockerfileProd);
+
+// --- Safe cleanup & Docker startup ---
 try {
+  console.log("🧹 Performing safe cleanup for dangling images...");
+  execSync(
+    "docker image prune -f --filter label=com.docker.compose.project=planet-api || true",
+    {
+      stdio: "inherit",
+    }
+  );
+
   console.log("🚀 Building and starting Docker containers...");
   execSync("docker compose up --build -d", { stdio: "inherit" });
+
   console.log("✅ Docker environment is up and running.");
 } catch (err) {
   console.error("❌ Failed to start Docker containers:", err.message);
+  process.exit(1);
 }
