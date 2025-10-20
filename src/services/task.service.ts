@@ -44,6 +44,20 @@ export const markComplete = async (
   return null;
 };
 
+// Mark a task as not complete
+export const markNotComplete = async (
+  id: number | string
+): Promise<Task | null> => {
+  const task = await TaskModel.findByPk(id);
+
+  if (task) {
+    task.isComplete = false;
+    await task.save();
+    return task;
+  }
+  return null;
+};
+
 export const archiveTask = async (
   id: number | string
 ): Promise<Task | null> => {
@@ -51,6 +65,19 @@ export const archiveTask = async (
 
   if (task) {
     task.archived = true;
+    await task.save();
+    return task;
+  }
+  return null;
+};
+
+export const unarchiveTask = async (
+  id: number | string
+): Promise<Task | null> => {
+  const task = await TaskModel.findByPk(id);
+
+  if (task) {
+    task.archived = false;
     await task.save();
     return task;
   }

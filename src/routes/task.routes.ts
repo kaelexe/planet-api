@@ -5,7 +5,9 @@ import {
   addTask,
   updateTask,
   archiveTask,
+  unarchiveTask,
   markComplete,
+  markNotComplete,
   markAsDone,
   deleteTask,
 } from "../controllers/task.controller.js";
@@ -17,7 +19,9 @@ router.get("/:id", getTask);
 router.post("/", addTask);
 router.put("/:id", updateTask);
 router.patch("/:id/archive", archiveTask);
+router.patch("/:id/unarchive", unarchiveTask);
 router.patch("/:id/complete", markComplete);
+router.patch("/:id/not-complete", markNotComplete);
 router.patch("/:id/done", markAsDone);
 router.delete("/:id", deleteTask);
 

@@ -148,6 +148,29 @@ export const markComplete = async (
   }
 };
 
+export const markNotComplete = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.markNotComplete(req.params.id);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+      logger.info(`Marking task ${req.params.id} as not complete`);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const archiveTask = async (
   req: Request,
   res: Response,
@@ -163,6 +186,29 @@ export const archiveTask = async (
     if (updatedTask) {
       res.json(updatedTask);
       logger.info(`Archiving task ${req.params.id}`);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const unarchiveTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Task ID is required" });
+    }
+
+    const updatedTask = await taskService.unarchiveTask(req.params.id);
+
+    if (updatedTask) {
+      res.json(updatedTask);
+      logger.info(`Unarchiving task ${req.params.id}`);
     } else {
       res.status(404).json({ message: "Task not found" });
     }
