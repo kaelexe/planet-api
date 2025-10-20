@@ -1,12 +1,16 @@
 import express, { Application } from "express";
-import cors from "cors";
 import routes from "./routes/index.js";
 import sequelize from "../config/db.config.js";
 import "../models/task.model.js";
+import dotenv from "dotenv";
+import corsMiddleware from "./middleware/cors.middleware.js";
+
+// Load environment variables
+dotenv.config();
 
 const app: Application = express();
 
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 app.use("/api", routes);
 
