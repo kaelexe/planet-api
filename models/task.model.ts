@@ -1,37 +1,13 @@
-import { DataTypes, Model, Optional } from "sequelize";
+import type {
+  Task,
+  TaskInput,
+} from "../src/constants/types/tasks.interface.js";
+import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db.config.js";
-
-// --- Priority Enum ---
-export enum TaskPriority {
-  Normal = "Normal",
-  Minor = "Minor",
-  High = "High",
-  Important = "Important",
-}
-
-// --- Attributes Interface ---
-export interface TaskAttributes {
-  id: number;
-  title: string;
-  description?: string | null;
-  isComplete: boolean;
-  priority: TaskPriority;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-// --- Creation Attributes ---
-export interface TaskCreationAttributes
-  extends Optional<
-    TaskAttributes,
-    "id" | "priority" | "isComplete" | "createdAt" | "updatedAt"
-  > {}
+import { TaskPriority } from "../src/constants/enums/tasks.priority.enum.js";
 
 // --- Model Definition ---
-class Task
-  extends Model<TaskAttributes, TaskCreationAttributes>
-  implements TaskAttributes
-{
+class TaskModel extends Model<Task, TaskInput> implements Task {
   public id!: number;
   public title!: string;
   public description!: string | null;
@@ -42,7 +18,7 @@ class Task
   public readonly updatedAt!: Date;
 }
 
-Task.init(
+TaskModel.init(
   {
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
@@ -74,4 +50,4 @@ Task.init(
   }
 );
 
-export default Task;
+export default TaskModel;

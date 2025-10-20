@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as taskService from "../services/task.service.js";
-import { logger, Logger } from "../utils/logger.js";
+import { logger } from "../utils/logger.js";
+import { TaskInput } from "../constants/types/tasks.interface.js";
 
 export const getTasks = async (
   req: Request,
@@ -35,13 +36,6 @@ export const getTask = async (
     next(err);
   }
 };
-
-// Optional: Define a type for the task input
-interface TaskInput {
-  title: string;
-  description?: string;
-  isComplete?: boolean;
-}
 
 export const addTask = async (
   req: Request<{}, {}, TaskInput>,

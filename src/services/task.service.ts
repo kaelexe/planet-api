@@ -1,18 +1,17 @@
-import Task, { TaskCreationAttributes } from "../../models/task.model.js";
+import { Task, TaskInput } from "../constants/types/tasks.interface.js";
+import TaskModel from "../../models/task.model.js";
 
 // Fetch all tasks
 export const getAllTasks = async (): Promise<Task[]> => {
-  return await Task.findAll();
+  return await TaskModel.findAll();
 };
 
 // Fetch a single task by ID
 export const getTask = async (id: number | string): Promise<Task | null> => {
-  return await Task.findByPk(id);
+  return await TaskModel.findByPk(id);
 };
 
 // Create a new task
-export const createTask = async (
-  data: TaskCreationAttributes
-): Promise<Task> => {
-  return await Task.create(data);
+export const createTask = async (data: TaskInput): Promise<Task> => {
+  return await TaskModel.create(data);
 };

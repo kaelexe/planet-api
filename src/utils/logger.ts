@@ -384,9 +384,13 @@ export class Logger {
     return childLogger;
   }
 }
-
+// TODO: does not work
 // Create default logger instance
-export const logger = new Logger();
+export const logger = new Logger({
+  logDir: process.env.LOG_DIR || path.join(process.cwd(), "logs"),
+  enableConsole: true, // MUST be true to appear in docker logs
+  enableFile: true, // MUST be true to persist logs
+});
 
 // Export factory function for custom configurations
 export const createLogger = (config?: Partial<LoggerConfig>): Logger => {

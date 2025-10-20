@@ -117,7 +117,7 @@ services:
 
   db:
     image: mysql:8
-    container_name: ${DB_HOST}
+    container_name: planet-${DB_HOST}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
