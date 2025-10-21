@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --legacy-watch --watch src --ext ts,json --exec \"node --loader ts-node/esm src/server.ts\"",
+    "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/server.js",
     "setup:docker": "node scripts/setup-docker.js",
