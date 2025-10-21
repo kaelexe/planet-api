@@ -45,33 +45,19 @@ until npx sequelize-cli db:migrate --config config/config.cjs; do
   sleep 2
 done
 
-# --- Development Mode ---
+# --- Mode Switch ---
 if [ "$NODE_ENV" = "development" ]; then
   echo "[$(date)] 👀 Development mode detected..."
-
-  # Check if dist exists or rebuild needed
-  if [ ! -d "dist" ]; then
-    echo "[$(date)] 🛠 Build directory not found — running initial TypeScript build..."
-    npm run build
-  else
-    if find src -type f -newer dist 2>/dev/null | grep -q .; then
-      echo "[$(date)] 🛠 Detected changes in source files — rebuilding TypeScript..."
-      npm run build
-    else
-      echo "[$(date)] ✅ No source changes detected — skipping rebuild."
-    fi
-  fi
-  
+  echo "[$(date)] 🚀 Starting Planet API ${NODE_ENV}..."
+  exec npm run dev
 else
-  # --- Production Mode ---
+  echo "[$(date)] 🏗️ Production mode detected..."
   if [ ! -d "dist" ]; then
     echo "[$(date)] 🛠 Building TypeScript project..."
     npm run build
   fi
+  exec node dist/src/server.js
 fi
-
-echo "[$(date)] 🚀 Starting Planet API ${NODE_ENV}..."
-exec node dist/src/server.js
 `;
 
 // --- Dockerfile.dev ---
@@ -81,14 +67,16 @@ const dockerfileDev = `# ----------------------------
 FROM node:18-alpine
 
 WORKDIR /app
-
+    
 COPY package*.json tsconfig.json ./
 RUN npm install
-
-COPY . .
-
+    
+# Copy only the entrypoint script
+COPY docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
-
+    
+ENV NODE_ENV=development
+    
 EXPOSE ${PORT}
 ENTRYPOINT ["./docker-entrypoint.sh"]
 `;
