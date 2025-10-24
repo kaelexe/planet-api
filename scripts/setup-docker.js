@@ -134,7 +134,7 @@ services:
       - .:/app
       - /app/node_modules
     networks:
-      - planet-net
+      - planet_network
 
   db:
     image: mysql:8
@@ -148,7 +148,7 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - planet-net
+      - planet_network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -159,7 +159,8 @@ volumes:
   planet-mysql-data:
 
 networks:
-  planet-net:
+  planet_network:
+    external: true
 `;
 
 // --- Helpers ---
