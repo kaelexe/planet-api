@@ -94,6 +94,10 @@ export const addTask = async (
       return res.status(400).json({ message: "Task title is required" });
     }
 
+    if (typeof req.body.isComplete === "undefined") {
+      req.body.isComplete = false;
+    }
+
     logger.info(`Creating task: ${req.body}`);
 
     const task = await taskService.createTask(req.body);
