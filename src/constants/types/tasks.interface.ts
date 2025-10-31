@@ -8,13 +8,19 @@ export interface Task {
   isComplete: boolean;
   archived: boolean;
   priority: TaskPriority;
+  dateDue?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 // For creating new tasks, some fields are optional
-export interface TaskInput
+export interface CreateTaskData
   extends Optional<
     Task,
-    "id" | "priority" | "isComplete" | "createdAt" | "updatedAt"
+    "id" | "isComplete" | "archived" | "dateDue" | "createdAt" | "updatedAt"
   > {}
+
+// For updating tasks, all fields are optional except id, createdAt, updatedAt
+export type UpdateTaskData = Partial<
+  Omit<Task, "id" | "createdAt" | "updatedAt">
+>;

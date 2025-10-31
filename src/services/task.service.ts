@@ -1,4 +1,8 @@
-import { Task, TaskInput } from "../constants/types/tasks.interface.js";
+import {
+  Task,
+  CreateTaskData,
+  UpdateTaskData,
+} from "../constants/types/tasks.interface.js";
 import TaskModel from "../../models/task.model.js";
 
 // Fetch all tasks
@@ -12,17 +16,17 @@ export const getTask = async (id: number | string): Promise<Task | null> => {
 };
 
 // Create a new task
-export const createTask = async (data: TaskInput): Promise<Task> => {
+export const createTask = async (data: CreateTaskData): Promise<Task> => {
   return await TaskModel.create(data);
 };
 
 // Update an existing task
 export const updateTask = async (
   id: number | string,
-  data: Partial<TaskInput>
+  data: Partial<UpdateTaskData>
 ): Promise<Task | null> => {
   const task = await TaskModel.findByPk(id);
-  
+
   if (task) {
     await task.update(data);
     return task;

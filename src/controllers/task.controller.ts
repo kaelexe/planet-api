@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import * as taskService from "../services/task.service.js";
 import { logger } from "../utils/logger.js";
-import { TaskInput } from "../constants/types/tasks.interface.js";
+import {
+  CreateTaskData,
+  UpdateTaskData,
+} from "../constants/types/tasks.interface.js";
 import { SortOrder, sortByKey } from "../utils/sort.js";
 
 export const getTasks = async (
@@ -62,7 +65,6 @@ export const getTasks = async (
   }
 };
 
-
 export const getTask = async (
   req: Request,
   res: Response,
@@ -85,7 +87,7 @@ export const getTask = async (
 };
 
 export const addTask = async (
-  req: Request<{}, {}, TaskInput>,
+  req: Request<{}, {}, CreateTaskData>,
   res: Response,
   next: NextFunction
 ) => {
@@ -108,7 +110,7 @@ export const addTask = async (
 };
 
 export const updateTask = async (
-  req: Request<{ id: string }, {}, Partial<TaskInput>>,
+  req: Request<{ id: string }, {}, Partial<UpdateTaskData>>,
   res: Response,
   next: NextFunction
 ) => {

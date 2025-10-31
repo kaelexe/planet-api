@@ -1,15 +1,16 @@
 import type {
   Task,
-  TaskInput,
+  CreateTaskData,
 } from "../src/constants/types/tasks.interface.js";
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db.config.js";
 import { TaskPriority } from "../src/constants/enums/tasks.priority.enum.js";
+import { addDateFormattingToModel } from "../src/utils/addDateFormattingToModel.js";
 
 // TODO: Add userID field when auth is implemented
 
 // --- Model Definition ---
-class TaskModel extends Model<Task, TaskInput> implements Task {
+class TaskModel extends Model<Task, CreateTaskData> implements Task {
   public id!: number;
   public title!: string;
   public description!: string | null;
@@ -51,11 +52,27 @@ TaskModel.init(
       allowNull: false,
       defaultValue: TaskPriority.Normal,
     },
+    dateDue: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "tasks",
     sequelize,
   }
 );
+
+addDateFormattingToModel(TaskModel);
 
 export default TaskModel;
