@@ -4,6 +4,8 @@ import {
   UpdateTaskData,
 } from "../constants/types/tasks.interface.js";
 import TaskModel from "../../models/task.model.js";
+import { logActivity } from "./activity-log.service.js";
+import { ActivityLogStatus } from "../constants/enums/activity-logs.status.enum.js";
 
 // Fetch all tasks
 export const getAllTasks = async (): Promise<Task[]> => {
@@ -39,13 +41,22 @@ export const markComplete = async (
   id: number | string
 ): Promise<Task | null> => {
   const task = await TaskModel.findByPk(id);
+  if (!task) return null;
 
-  if (task) {
-    task.isComplete = true;
-    await task.save();
-    return task;
+  if (!task.isComplete) {
+    await logActivity({
+      entityType: "task",
+      entityId: task.id,
+      action: "marked_complete",
+      oldValues: { isComplete: task.isComplete },
+      newValues: { isComplete: true },
+      status: ActivityLogStatus.Success,
+    });
   }
-  return null;
+
+  task.isComplete = true;
+  await task.save();
+  return task;
 };
 
 // Mark a task as not complete
@@ -53,13 +64,22 @@ export const markNotComplete = async (
   id: number | string
 ): Promise<Task | null> => {
   const task = await TaskModel.findByPk(id);
+  if (!task) return null;
 
-  if (task) {
-    task.isComplete = false;
-    await task.save();
-    return task;
+  if (task.isComplete) {
+    await logActivity({
+      entityType: "task",
+      entityId: task.id,
+      action: "marked_not_complete",
+      oldValues: { isComplete: task.isComplete },
+      newValues: { isComplete: false },
+      status: ActivityLogStatus.Success,
+    });
   }
-  return null;
+
+  task.isComplete = false;
+  await task.save();
+  return task;
 };
 
 export const archiveTask = async (

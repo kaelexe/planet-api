@@ -70,6 +70,20 @@ TaskModel.init(
   {
     tableName: "tasks",
     sequelize,
+    indexes: [
+      {
+        fields: ["isComplete"],
+      },
+      {
+        fields: ["archived"],
+      },
+      {
+        fields: ["priority"],
+      },
+      {
+        fields: ["dateDue"],
+      },
+    ],
   }
 );
 

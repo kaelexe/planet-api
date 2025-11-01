@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "password",
-    "database": "planet_db",
+    "database": "planetdb",
     "host": "planet-db",
     "dialect": "mysql"
   },

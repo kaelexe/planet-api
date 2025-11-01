@@ -1,0 +1,9 @@
+# 
+# Activity Los API Requests
+#
+
+###
+# Fetch all tasks
+GET http://localhost/api/activity/logs
+Accept: application/json
+Content-Type: application/json
