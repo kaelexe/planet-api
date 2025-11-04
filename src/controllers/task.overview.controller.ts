@@ -20,7 +20,10 @@ export const getTasksOverview = async (
 
     const allTasks = await getAllTasks();
     const tasks = allTasks.filter((task) => {
+      // if task has no due date, dont include
       if (!task.dateDue) return false;
+      // if task is done, dont include
+      if (task.isComplete) return false;
 
       return dayjs(task.dateDue).month() + 1 === month;
     });
