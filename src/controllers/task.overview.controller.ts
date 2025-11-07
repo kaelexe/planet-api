@@ -40,7 +40,13 @@ export const getTasksOverview = async (
       dayjs(log.createdAt).isBetween(startOfRange, endOfRange, null, "[]")
     );
 
-    res.json({ tasks, activityLogs });
+    // contents may change in the future
+    const totalTasks = allTasks.length;
+    const pendingTasksCount = allTasks.filter(
+      (task) => !task.isComplete
+    ).length;
+
+    res.json({ tasks, activityLogs, totalTasks, pendingTasksCount });
   } catch (err) {
     next(err);
     res.status(500).json({ error: "Something went wrong" });
